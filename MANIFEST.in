@@ -1,6 +1,6 @@
 include README
 include setup.cfg
 include setup.py
+include examples/cvloop_examples.ipynb
+include examples/cvloop_functions.ipynb
 recursive-include cvloop *.py
-recursive-include examples *.ipynb
-
