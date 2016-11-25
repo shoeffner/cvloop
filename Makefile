@@ -24,11 +24,11 @@ doc:
 	python tools/create_functions_ipynb.py  examples/cvloop_functions.ipynb
 
 # Publishes to pypitest
-testpublish:
+testpublish: package
 	@read -p "Enter the name of this package to verify upload to pypi test: " name ; \
 	if [ "$$name" == "cvloop" ]; then \
-		python setup.py register -r pypitest ; \
-		python setup.py sdist upload -r pypitest ; \
+		twine register -r pypitest $$(ls dist/*.tar.gz) ; \
+		twine upload -r pypitest dist/* ; \
 	else \
 		echo 'Sorry, this was wrong. Please try again.' ; \
 	fi
@@ -37,8 +37,8 @@ testpublish:
 publish: package
 	@read -p "Enter the name of this package to verify upload to pypi: " name ; \
 	if [ "$$name" == "cvloop" ]; then \
-		python setup.py register -r pypi ; \
-		python setup.py upload -r pypi ; \
+		twine register -r pypi $$(ls dist/*.tar.gz) ; \
+		twine upload -r pypi dist/* ; \
 	else \
 		echo 'Sorry, this was wrong. Please try again.' ; \
 	fi
