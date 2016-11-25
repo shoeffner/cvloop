@@ -1,0 +1,6 @@
+include README
+include setup.cfg
+include setup.py
+recursive-include cvloop *.py
+recursive-include examples *.ipynb
+
