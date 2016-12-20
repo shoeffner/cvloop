@@ -7,7 +7,6 @@ Provides cvloop, a way to show opencv video loops. Designed for jupyter notebook
 
 .. code-block:: python
 
-    %matplotlib notebook
     from cvloop import cvloop
     cvloop()
 
@@ -15,15 +14,13 @@ Provides cvloop, a way to show opencv video loops. Designed for jupyter notebook
 
 .. code-block:: python
 
-    %matplotlib notebook
     from cvloop import cvloop
     cvloop(function=lambda frame: 255 - frame, side_by_side=True)
 
-**Complex example**: Show video file with background extraction (See `OpenCV Documentation`_).
+**Complex example**: Show video file with background extraction (See `OpenCV Documentation`_; `Video`_).
 
 .. code-block:: python
 
-    %matplotlib notebook
     from cvloop import cvloop
     import cv2
 
@@ -31,7 +28,7 @@ Provides cvloop, a way to show opencv video loops. Designed for jupyter notebook
         return mog2.fgbg.apply(frame)
     mog2.fgbg = cv2.createBackgroundSubtractorMOG2()
 
-    cvloop('test.avi', function=mog2, side_by_side=True)
+    cvloop('768x576.avi', function=mog2, side_by_side=True)
 
 **More examples**: For more examples check out the `examples notebook`_.
 
@@ -49,5 +46,6 @@ Dependencies
 -  numpy
 
 .. _`OpenCV Documentation`: http://docs.opencv.org/3.1.0/db/d5c/tutorial_py_bg_subtraction.html
+.. _`Video`: https://github.com/opencv/opencv_extra/tree/master/testdata/cv/video
 .. _`examples notebook`: examples/cvloop_examples.ipynb
 

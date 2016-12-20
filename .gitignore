@@ -91,3 +91,6 @@ ENV/
 
 # temp files
 *.swp
+
+# Mac Files
+.DS_Store

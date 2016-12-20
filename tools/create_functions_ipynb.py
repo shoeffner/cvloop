@@ -145,7 +145,6 @@ def main():
                 'outputs': [],
                 'execution_count': None,
                 'source': [
-                    '%matplotlib notebook\n',
                     'from cvloop import cvloop'
                 ]
             },
@@ -163,7 +162,7 @@ def main():
                 'name': 'python',
                 'nbconvert_exporter': 'python',
                 'pygments_lexer': 'ipython3',
-                'version': '3.6.0b4'
+                'version': '3.5.1+'
             }
         }
     }

@@ -106,22 +106,3 @@ def invert(image):
     """
     return np.max(image) - image
 
-
-def print_info(image):
-    """Behaves like the identity function but on the first call it prints some
-    useful information about the capture image.
-
-    Args:
-        image: The input frame.
-    Returns:
-        The input.
-    """
-    if not print_info.printed:
-        print('Capture Information')
-        print('\tDimensions (HxW): {}x{}'.format(*image.shape[0:2]))
-        print('\tColor channels:   {}'.format(image.shape[2] if len(image.shape) > 2 else 1))
-        print('\tColor range:      {}-{}'.format(np.min(image), np.max(image)))
-        print('\tdtype:            {}'.format(image.dtype))
-        print_info.printed = True
-    return image
-print_info.printed = False
