@@ -21,7 +21,7 @@ import matplotlib.image as image
 
 def cvloop(source=0, function=lambda x: x,
            side_by_side=False, convert_color=cv2.COLOR_BGR2RGB,
-           cmaps=None, print_info=False):
+           cmaps=None, print_info=False, figure=None):
     """Runs a video loop for the specified source and modifies the stream with the function.
 
     The source can either be an integer for a webcam device, a string to load a video file or
@@ -70,17 +70,17 @@ def cvloop(source=0, function=lambda x: x,
     capture = source if source_is_capture else cv2.VideoCapture(source)
 
     video_animation = VideoAnimation(capture=capture, function=function, side_by_side=side_by_side,
-                                     convert_color=convert_color, cmaps=cmaps, print_info=print_info)
-    plt.show()
+                                     convert_color=convert_color, cmaps=cmaps, print_info=print_info,figure=figure)
+    # plt.show()
 
-    return video_animation
+    return plt, video_animation
 
 
 class VideoAnimation(animation.TimedAnimation):
     """Uses a TimedAnimation to efficiently render video sources with blit."""
 
     def __init__(self, capture=None, function=lambda x: x, side_by_side=False,
-                 convert_color=cv2.COLOR_BGR2RGB, cmaps=None, print_info=False):
+                 convert_color=cv2.COLOR_BGR2RGB, cmaps=None, print_info=False,figure=None):
         """Initializes the VideoAnimation.
 
         The arguments are the same as for the cvloop function, however
@@ -94,8 +94,10 @@ class VideoAnimation(animation.TimedAnimation):
         self.capture = capture if capture is not None else cv2.VideoCapture(0)
         self.function = function
         self.convert_color = convert_color
-
-        self.figure = plt.figure()
+        if figure == None:
+            self.figure = plt.figure()
+        else:
+            self.figure = figure
         self.original = None
         self.processed = None
 

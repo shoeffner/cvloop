@@ -4,7 +4,7 @@ import re
 import sys
 
 
-VERSION = '0.2.0' # x.y.z[-dev#]
+VERSION = '0.2.1' # x.y.z[-dev#]
 REPOSITORY = 'https://github.com/shoeffner/cvloop'
 
 README = ''

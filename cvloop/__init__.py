@@ -7,7 +7,8 @@ OPENCV_VERSION_COMPATIBLE = False
 try:
     import cv2
     OPENCV_FOUND = True
-except ModuleNotFoundError:
+except Exception as e:
+    # print ("Error:", e)
     print('OpenCV is not found (tried importing cv2).', file=sys.stderr)
     print('''
     Is OpenCV installed and properly added to your path?
