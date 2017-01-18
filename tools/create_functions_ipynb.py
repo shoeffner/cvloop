@@ -3,14 +3,13 @@ notebook."""
 
 import inspect
 import json
-import re
 import sys
 
 sys.path.insert(0, '../cvloop')
-import cvloop.functions
+import cvloop.functions  # noqa: E402
 
 
-GENERATE_ARGS = False
+GENERATE_ARGS = True
 
 
 def is_mod_function(mod, fun):
@@ -87,34 +86,38 @@ def get_linenumbers(functions, module, searchstr='def {}(image):\n'):
 
 def format_doc(fun):
     """Formats the documentation in a nicer way and for notebook cells."""
+    SEPARATOR = '============================='
+    func = cvloop.functions.__dict__[fun]
 
-    doc_lines = ['{}'.format(l) for l in
-                 cvloop.functions.__dict__[fun].__doc__.split('\n')]
+    doc_lines = ['{}'.format(l).strip() for l in func.__doc__.split('\n')]
+    if hasattr(func, '__init__'):
+        doc_lines.append(SEPARATOR)
+        doc_lines += ['{}'.format(l).strip() for l in
+                      func.__init__.__doc__.split('\n')]
 
     mod_lines = []
     argblock = False
     returnblock = False
     for line in doc_lines:
-        if 'Args:' in line:
+        if line == SEPARATOR:
+            mod_lines.append('\n#### `{}.__init__(...)`:\n\n'.format(fun))
+        elif 'Args:' in line:
             argblock = True
             if GENERATE_ARGS:
-                mod_lines.append('**{}**\n\n'.format(
-                    re.sub('^    ', '', line)))
+                mod_lines.append('**{}**\n'.format(line))
         elif 'Returns:' in line:
             returnblock = True
-            mod_lines.append('\n**{}**'.format(
-                re.sub('^    ', '', line)))
+            mod_lines.append('\n**{}**'.format(line))
         elif not argblock and not returnblock:
-            mod_lines.append('{}\n'.format(re.sub('^    ', '', line)))
+            mod_lines.append('{}\n'.format(line))
         elif argblock and not returnblock and ':' in line:
             if GENERATE_ARGS:
                 mod_lines.append('- *{}:* {}\n'.format(
-                    *re.sub('^ +', '', line).split(':')))
+                    *line.split(':')))
         elif returnblock:
             mod_lines.append(line)
         else:
             mod_lines.append('{}\n'.format(line))
-
     return mod_lines
 
 
@@ -148,6 +151,7 @@ def create_code_cell(fun, isclass=False):
         'outputs': [],
         'execution_count': None,
         'source': [
+            'from cvloop import cvloop\n',
             'from cvloop.functions import {}\n'.format(fun),
             'cvloop(function={}{}, side_by_side=True)'.format(fun, '()' if
                                                               isclass else '')
@@ -168,15 +172,6 @@ def main():
                     'functions provided in the [`cvloop.functions` module](',
                     'https://github.com/shoeffner/cvloop/blob/',
                     'develop/cvloop/functions.py).'
-                ]
-            },
-            {
-                'cell_type': 'code',
-                'metadata': {},
-                'outputs': [],
-                'execution_count': None,
-                'source': [
-                    'from cvloop import cvloop'
                 ]
             },
         ],
@@ -200,7 +195,8 @@ def main():
     classes = list_classes('cvloop.functions')
     functions = list_functions('cvloop.functions')
 
-    line_numbers_cls = get_linenumbers(classes, cvloop.functions, 'class {}:\n')
+    line_numbers_cls = get_linenumbers(classes, cvloop.functions,
+                                       'class {}:\n')
     line_numbers = get_linenumbers(functions, cvloop.functions)
 
     for cls in classes:
