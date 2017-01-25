@@ -1,6 +1,8 @@
 """Provides cvloop, a ready to use OpenCV VideoCapture mapper, designed for jupyter notebooks."""
 import sys
 
+__version__ = '0.3.0'
+
 OPENCV_FOUND = False
 OPENCV_VERSION_COMPATIBLE = False
 

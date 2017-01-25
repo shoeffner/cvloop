@@ -68,12 +68,7 @@ def cvloop(source=0, function=lambda x: x,
         The video animation object. It is important to keep a reference to it
         to keep the animation running.
     """
-    # Select source
-    source_is_capture = isinstance(source, type(cv2.VideoCapture())) or \
-        hasattr(source, 'read')
-    capture = source if source_is_capture else cv2.VideoCapture(source)
-
-    video_animation = VideoAnimation(capture=capture, function=function,
+    video_animation = VideoAnimation(capture=source, function=function,
                                      side_by_side=side_by_side,
                                      convert_color=convert_color,
                                      cmaps=cmaps, print_info=print_info)
@@ -98,11 +93,22 @@ class VideoAnimation(animation.TimedAnimation):
             capture: The video source. If None, the webcam is used.
             for other args see cvloop
         """
-        self.capture = capture if capture is not None else cv2.VideoCapture(0)
+        self.figure = plt.figure()
+
+        if capture is not None and \
+                (isinstance(capture, type(cv2.VideoCapture())) or
+                 hasattr(capture, 'read')):
+            self.capture = capture
+        else:
+            self.capture = cv2.VideoCapture(0)
+            # Connect release to close_event of nbAgg
+            # See matplotlib:
+            # /lib/matplotlib/backends/backend_nbagg.py#L252
+            self.figure.canvas.mpl_connect('close_event', self.release)
+
         self.function = function
         self.convert_color = convert_color
 
-        self.figure = plt.figure()
         self.original = None
         self.processed = None
 
@@ -136,6 +142,13 @@ class VideoAnimation(animation.TimedAnimation):
         self.update_info()
 
         super().__init__(self.figure, interval=50, blit=True)
+
+    def release(self, *args):
+        """Tries to release the capture."""
+        try:
+            self.capture.release()
+        except AttributeError:
+            pass
 
     def print_info(self, capture):
         """Prints information about the unprocessed image.
