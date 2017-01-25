@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.3.0
+* Classes instead of functions to handle state.
+* DrawHat feature (by @JustinShenk)
+
 ## Version 0.2.0
 * Animation with blits instead of draws.
 * Matplotlib selects nbAgg if the backend is inline automatically
