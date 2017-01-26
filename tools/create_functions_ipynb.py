@@ -151,8 +151,7 @@ def create_code_cell(fun, isclass=False):
         'outputs': [],
         'execution_count': None,
         'source': [
-            'from cvloop import cvloop\n',
-            'from cvloop.functions import {}\n'.format(fun),
+            'from cvloop import cvloop, {}\n'.format(fun),
             'cvloop(function={}{}, side_by_side=True)'.format(fun, '()' if
                                                               isclass else '')
         ]
