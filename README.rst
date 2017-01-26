@@ -35,7 +35,7 @@ Provides cvloop, a way to show opencv video loops. Designed for jupyter notebook
 Requirements
 ------------
 
-(Recommended versions, additionally tested versions in parentheses)
+(Recommended versions, additionally tested versions in parentheses.)
 
 -  Python 3.6 (3.5)
 -  OpenCV 3.2 (3.1)

@@ -75,10 +75,12 @@ class cvloop(animation.TimedAnimation):
                            dimensions, color channels, data type. Skips the
                            output of one frame.
         """
-        if source is not None and \
-                (isinstance(source, type(cv2.VideoCapture())) or
-                 hasattr(source, 'read')):
-            self.capture = source
+        if source is not None:
+            if isinstance(source, type(cv2.VideoCapture())) \
+                    or hasattr(source, 'read'):
+                self.capture = source
+            else:
+                self.capture = cv2.VideoCapture(source)
         else:
             self.capture = cv2.VideoCapture(0)
 
