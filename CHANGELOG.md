@@ -3,6 +3,7 @@
 ## Version 0.3.0
 * Classes instead of functions to handle state.
 * DrawHat feature (by @JustinShenk)
+* Video controls: Pause button + stop on figure closing.
 
 ## Version 0.2.0
 * Animation with blits instead of draws.
