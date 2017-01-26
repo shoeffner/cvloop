@@ -13,98 +13,77 @@ import matplotlib
 if matplotlib.get_backend() == 'module://ipykernel.pylab.backend_inline':
     matplotlib.use('nbAgg')
 
+# Monkeypatch backend to include "pause" button and fire the pause_event.
+from matplotlib.backends.backend_nbagg import NavigationIPy  # noqa: E402
+NavigationIPy.toolitems += [('Pause', 'Pause/Resume video',
+                             'fa fa-pause icon-pause', 'pause')]
+NavigationIPy.pause = lambda self: self.canvas.callbacks.process('pause_event')
+
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.animation as animation  # noqa: E402
 import matplotlib.image as image  # noqa: E402
 
 
-def cvloop(source=0, function=lambda x: x,
-           side_by_side=False, convert_color=cv2.COLOR_BGR2RGB,
-           cmaps=None, print_info=False):
-    """Runs a video loop for the specified source and modifies the stream with
-    the function.
-
-    The source can either be an integer for a webcam device, a string to load a
-    video file or a VideoCapture object. In the last case, the capture object
-    will not be released by this function.
-
-    The function takes in a frame and returns the modified frame. The default
-    value just passes the value through, it is equivalent to the identity
-    function.
-
-    If side_by_side is True, the input as well as the modified image are shown
-    side by side, otherwise only the output is shown.
-
-    If convert_color can be any value for cv2.cvtColor, e.g. cv2.COLOR_BGR2RGB.
-    If it is -1, no color conversion is performed, otherwise a color conversion
-    using cv2.cvtColor is performed before the image is passed to the function.
-
-    Args:
-        source:        The video source; ints for webcams/devices, a string to
-                       load a video file. To fine tune a video source, it is
-                       possible to pass a VideoCapture object directly.
-                       (Default: 0)
-        function:      The modification function.
-                       (Default: identity function `lambda x: x`)
-        side_by_side:  If True, both images are shown, the original and the
-                       modified image.
-                       (Default: False)
-        convert_color: Converts the image with the given value using
-                       `cv2.cvtColor`, unless value is -1.
-                       (Default: `cv2.COLOR_BGR2RGB`)
-        cmaps:         If None, the plot function makes guesses about what
-                       color maps to use (if at all). If a single value,
-                       that color map is used for all plots
-                       (e.g. cmaps='gray').
-                       If cmaps is a tuple, the first value is used on the
-                       original image, the second value for the modified image.
-                       If cmaps is a tuple, None-entries are ignored and result
-                       in the normal guessing.
-        print_info:    If True, prints some info about the resource:
-                       dimensions, color channels, data type. Skips the output
-                       of one frame.
-
-    Returns:
-        The video animation object. It is important to keep a reference to it
-        to keep the animation running.
-    """
-    video_animation = VideoAnimation(capture=source, function=function,
-                                     side_by_side=side_by_side,
-                                     convert_color=convert_color,
-                                     cmaps=cmaps, print_info=print_info)
-    plt.show()
-
-    return video_animation
-
-
-class VideoAnimation(animation.TimedAnimation):
+class cvloop(animation.TimedAnimation):
     """Uses a TimedAnimation to efficiently render video sources with blit."""
 
-    def __init__(self, capture=None, function=lambda x: x, side_by_side=False,
+    def __init__(self, source=None, function=lambda x: x, side_by_side=False,
                  convert_color=cv2.COLOR_BGR2RGB, cmaps=None,
                  print_info=False):
-        """Initializes the VideoAnimation.
+        """Runs a video loop for the specified source and modifies the stream with
+        the function.
 
-        The arguments are the same as for the cvloop function, however
-        capture is different from source as it expects a proper video source
-        already. Only in case of None the webcam is used as a fallback.
+        The source can either be an integer for a webcam device, a string to
+        load a video file or a VideoCapture object. In the last case, the
+        capture object will not be released by this function.
+
+        The function takes in a frame and returns the modified frame. The
+        default value just passes the value through, it is equivalent to the
+        identity function.
+
+        If side_by_side is True, the input as well as the modified image are
+        shown side by side, otherwise only the output is shown.
+
+        If convert_color can be any value for cv2.cvtColor, e.g.
+        cv2.COLOR_BGR2RGB.  If it is -1, no color conversion is performed,
+        otherwise a color conversion using cv2.cvtColor is performed before the
+        image is passed to the function.
 
         Args:
-            capture: The video source. If None, the webcam is used.
-            for other args see cvloop
+            source:        The video source; ints for webcams/devices, a string
+                           to load a video file. To fine tune a video source,
+                           it is possible to pass a VideoCapture object
+                           directly.
+                           (Default: 0)
+            function:      The modification function.
+                           (Default: identity function `lambda x: x`)
+            side_by_side:  If True, both images are shown, the original and the
+                           modified image.
+                           (Default: False)
+            convert_color: Converts the image with the given value using
+                           `cv2.cvtColor`, unless value is -1.
+                           (Default: `cv2.COLOR_BGR2RGB`)
+            cmaps:         If None, the plot function makes guesses about what
+                           color maps to use (if at all). If a single value,
+                           that color map is used for all plots
+                           (e.g. cmaps='gray').
+                           If cmaps is a tuple, the first value is used on the
+                           original image, the second value for the modified
+                           image. If cmaps is a tuple, None-entries are ignored
+                           and result in the normal guessing.
+            print_info:    If True, prints some info about the resource:
+                           dimensions, color channels, data type. Skips the
+                           output of one frame.
         """
-        self.figure = plt.figure()
-
-        if capture is not None and \
-                (isinstance(capture, type(cv2.VideoCapture())) or
-                 hasattr(capture, 'read')):
-            self.capture = capture
+        if source is not None and \
+                (isinstance(source, type(cv2.VideoCapture())) or
+                 hasattr(source, 'read')):
+            self.capture = source
         else:
             self.capture = cv2.VideoCapture(0)
-            # Connect release to close_event of nbAgg
-            # See matplotlib:
-            # /lib/matplotlib/backends/backend_nbagg.py#L252
-            self.figure.canvas.mpl_connect('close_event', self.release)
+
+        self.figure = plt.figure()
+        self.connect_event_handlers()
 
         self.function = function
         self.convert_color = convert_color
@@ -142,13 +121,26 @@ class VideoAnimation(animation.TimedAnimation):
         self.update_info()
 
         super().__init__(self.figure, interval=50, blit=True)
+        plt.show()
 
-    def release(self, *args):
+    def connect_event_handlers(self):
+        """Connects event handlers to the figure."""
+        self.figure.canvas.mpl_connect('close_event', self.evt_release)
+        self.figure.canvas.mpl_connect('pause_event', self.evt_toggle_pause)
+
+    def evt_release(self, *args):
         """Tries to release the capture."""
         try:
             self.capture.release()
         except AttributeError:
             pass
+
+    def evt_toggle_pause(self, *args):
+        """Pauses and resumes the video source."""
+        if self.event_source._timer is None:
+            self.event_source.start()
+        else:
+            self.event_source.stop()
 
     def print_info(self, capture):
         """Prints information about the unprocessed image.
