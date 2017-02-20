@@ -95,3 +95,6 @@ ENV/
 
 # Mac Files
 .DS_Store
+
+# custom
+examples/*.avi
