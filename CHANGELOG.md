@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 0.3.1
+* The webcam no longer takes precedence over video files.
+
 ## Version 0.3.0
 * Classes instead of functions to handle state.
 * DrawHat feature (by @JustinShenk)

@@ -30,8 +30,8 @@ class cvloop(animation.TimedAnimation):
     def __init__(self, source=None, function=lambda x: x, side_by_side=False,
                  convert_color=cv2.COLOR_BGR2RGB, cmaps=None,
                  print_info=False):
-        """Runs a video loop for the specified source and modifies the stream with
-        the function.
+        """Runs a video loop for the specified source and modifies the stream
+        with the function.
 
         The source can either be an integer for a webcam device, a string to
         load a video file or a VideoCapture object. In the last case, the
