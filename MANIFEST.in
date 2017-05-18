@@ -1,4 +1,5 @@
 include README.rst
+include LICENSE
 include setup.cfg
 include setup.py
 include examples/cvloop_examples.ipynb

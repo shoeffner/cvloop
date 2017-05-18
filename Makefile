@@ -1,5 +1,9 @@
-# Installs the package locally
+# Installs the editable version
 install: uninstall package
+	pip install -e $(CURDIR)
+
+# Installs the packaged version
+testpackage: uninstall package
 	pip install dist/cvloop*.tar.gz
 
 # Packs the package into the dist directory and signs it
