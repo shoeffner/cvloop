@@ -1,5 +1,7 @@
 """Provides ready to use example functions for the cvloop."""
 
+from . import OPENCV_CASCADE_PATH
+import os
 import numpy as np
 import cv2
 
@@ -102,6 +104,7 @@ class BackgroundSubtractorMOG2:
     See also
     http://docs.opencv.org/3.1.0/db/d5c/tutorial_py_bg_subtraction.html.
     """
+
     def __init__(self):
         """Initializes the `BackgroundSubtractorMOG2`."""
         self.fgbg = cv2.createBackgroundSubtractorMOG2()
@@ -133,19 +136,28 @@ class DrawHat:
 
     Uses a Haar cascade for face detection and draws provided hats above the
     detected faces.
+
+    The default hat (examples/hat.png) is taken from
+    https://pixabay.com/en/hat-trilby-black-brim-crease-felt-157581/
+    and was released unter CC0 Public Domain.
     """
 
-    def __init__(self, hat_path=None, cascade_path='/usr/local/opt/opencv3/share/OpenCV/haarcascades/haarcascade_frontalface_default.xml',  # noqa: E501
+    def __init__(self, hat_path=os.path.join(os.curdir, 'hat.png'),
+                 cascade_path=os.path.join(
+                              OPENCV_CASCADE_PATH, 'haarcascades',
+                              'haarcascade_frontalface_default.xml'),
                  w_offset=1.3, x_offset=-20, y_offset=80, draw_box=False):
         """Initializes a `DrawHat` instance.
 
         Args:
-            hat_path:     The path to the hat files.
+            hat_path: The path to the hat file. Defaults to ./hat.png .
             cascade_path: The path to the face cascade file.
-            w_offset:     Hat width additional scaling.
-            x_offset:     Number of pixels right to move hat.
-            y_offset:     Number of pixels down to move hat.
-            draw_box:     If True, draws boxes around detected faces.
+                          Defaults to cvloop.OPENCV_CASCADE_PATH/haarcascades/
+                                        haarcascade_frontalface_default.xml
+            w_offset: Hat width additional scaling.
+            x_offset: Number of pixels right to move hat.
+            y_offset: Number of pixels down to move hat.
+            draw_box: If True, draws boxes around detected faces.
         """
         self.w_offset = w_offset
         self.x_offset = x_offset
