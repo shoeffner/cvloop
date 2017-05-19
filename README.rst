@@ -37,8 +37,8 @@ Requirements
 
 (Recommended versions, additionally tested versions in parentheses.)
 
--  Python 3.6 (3.5)
--  OpenCV 3.2 (3.1)
+-  Python 3.6 (Required)
+-  OpenCV 3.2
 -  Jupyter 4.3.1
 
 Dependencies
