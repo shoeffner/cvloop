@@ -4,6 +4,7 @@
 ## Version 0.3.2
 
 - Uses some defaults to find the paths for the cascades. The path can be accessed using `cvloop.OPENCV_CASCADE_PATH`.
+- Including LICENSE in package distribution.
 
 
 ## Version 0.3.1
