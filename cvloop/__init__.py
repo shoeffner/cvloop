@@ -1,8 +1,9 @@
 """Provides cvloop, a ready to use OpenCV VideoCapture mapper, designed for
 jupyter notebooks."""
 import sys
+import os
 
-__version__ = '0.3.1'
+__version__ = '0.3.2'
 
 OPENCV_FOUND = False
 OPENCV_VERSION_COMPATIBLE = False
@@ -33,5 +34,19 @@ if OPENCV_FOUND:
               file=sys.stderr)
 
 if OPENCV_FOUND and OPENCV_VERSION_COMPATIBLE:
+    try:
+        OPENCV_CASCADE_PATH
+    except NameError:
+        OPENCV_CASCADE_PATH = os.curdir
+        for path in [
+            # Max OS with Brew
+            (os.sep, 'usr', 'local', 'opt', 'opencv3', 'share', 'OpenCV'),
+            # Ubuntu / Arch
+            (os.sep, 'usr', 'share', 'opencv'),
+                ]:
+            path = os.path.abspath(os.path.join(*path))
+            if os.path.isdir(os.path.join(path, 'haarcascades')):
+                OPENCV_CASCADE_PATH = path
+
     from .cvloop import cvloop
     from .functions import *
