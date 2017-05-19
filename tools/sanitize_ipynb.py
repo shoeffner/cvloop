@@ -21,8 +21,8 @@ def main():
         try:
             if cell['cell_type'] == 'code':
                 cell['outputs'] = []
-                cell['metadata'] = {}
                 cell['execution_count'] = None
+            cell['metadata'] = {}
         except KeyError:
             pass
 
