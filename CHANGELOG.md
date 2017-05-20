@@ -1,6 +1,12 @@
 # Changelog
 
 
+## Version 0.3.3
+
+- Updating README.rst to reflect that Python 3.5 is no longer supported.
+- `__version__` is accessed without importing everything.
+
+
 ## Version 0.3.2
 
 - Uses some defaults to find the paths for the cascades. The path can be accessed using `cvloop.OPENCV_CASCADE_PATH`.
