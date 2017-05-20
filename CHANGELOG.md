@@ -4,6 +4,7 @@
 ## Version 0.3.3
 
 - Updating README.rst to reflect that Python 3.5 is no longer supported.
+- `__version__` is accessed without importing everything.
 
 
 ## Version 0.3.2
