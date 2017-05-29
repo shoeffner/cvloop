@@ -1,3 +1,5 @@
+cvloopversion = $(shell python -c "import cvloop; print(cvloop.__version__)")
+
 # Installs the editable version
 install: uninstall package
 	pip install -e $(CURDIR)
@@ -11,6 +13,7 @@ package: clean doc
 	python setup.py sdist
 	gpg --detach-sign --armor dist/cvloop*.tar.gz
 	shasum -a 256 dist/cvloop-*.tar.gz
+
 
 
 # Uninstalls the package from a local installation
@@ -40,11 +43,23 @@ testpublish: package
 	fi
 
 # Publishes to pypi
-publish: package
+publish: package updateforge
 	@read -p "Enter the name of this package to verify upload to pypi: " name ; \
 	if [ "$$name" == "cvloop" ]; then \
-		twine register -r pypi $$(ls dist/*.tar.gz) ; \
-		twine upload -r pypi dist/* ; \
+		twine register -r pypi $$(ls dist/*.tar.gz) ;
+		twine upload -r pypi dist/* ;
+		cd ./tools/cvloop-feedstock \
+			&& git commit -am "Updating cvloop to version $(cvloopversion)" \
+			&& git push ;
+		hub pull-request \
+			-b conda-forge:cvloop-feedstock \
+			-h shoeffner:cvloop-feedstock \
+			-m "Updating cvloop to version $(cvloopversion)" ;
 	else \
 		echo 'Sorry, this was wrong. Please try again.' ; \
 	fi
+
+updateforge:
+	python3 tools/updaterecipe.py \
+			$(cvloopversion) \
+			$(shell shasum -a 256 dist/cvloop-*.tar.gz) ;

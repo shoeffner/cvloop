@@ -1,0 +1,3 @@
+[submodule "tools/cvloop-feedstock"]
+	path = tools/cvloop-feedstock
+	url = git@github.com:shoeffner/cvloop-feedstock.git
