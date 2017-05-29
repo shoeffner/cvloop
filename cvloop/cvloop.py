@@ -22,14 +22,19 @@ NavigationIPy.pause = lambda self: self.canvas.callbacks.process('pause_event')
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.animation as animation  # noqa: E402
 import matplotlib.image as image  # noqa: E402
+import matplotlib.patches as patches  # noqa: E402
 
 
 class cvloop(animation.TimedAnimation):
     """Uses a TimedAnimation to efficiently render video sources with blit."""
 
-    def __init__(self, source=None, function=lambda x: x, side_by_side=False,
-                 convert_color=cv2.COLOR_BGR2RGB, cmaps=None,
-                 print_info=False):
+    def __init__(self, source=None, function=lambda x: x, *,
+                 side_by_side=False, convert_color=cv2.COLOR_BGR2RGB,
+                 cmaps=None, print_info=False, annotations=None,
+                 annotations_default={'shape': 'RECT',
+                                      'color': '#228B22',
+                                      'line': 2,
+                                      'size': (20, 20)}):
         """Runs a video loop for the specified source and modifies the stream
         with the function.
 
@@ -50,36 +55,55 @@ class cvloop(animation.TimedAnimation):
         image is passed to the function.
 
         Args:
-            source:        The video source; ints for webcams/devices, a string
-                           to load a video file. To fine tune a video source,
-                           it is possible to pass a VideoCapture object
-                           directly.
-                           (Default: 0)
-            function:      The modification function.
-                           (Default: identity function `lambda x: x`)
-            side_by_side:  If True, both images are shown, the original and the
-                           modified image.
-                           (Default: False)
+            source: The video source; ints for webcams/devices, a string to
+                    load a video file. To fine tune a video source, it is
+                    possible to pass a VideoCapture object directly.
+                    (Default: 0)
+            function: The modification function.
+                      (Default: identity function `lambda x: x`)
+            side_by_side: If True, both images are shown, the original and the
+                          modified image.
+                          (Default: False)
             convert_color: Converts the image with the given value using
                            `cv2.cvtColor`, unless value is -1.
                            (Default: `cv2.COLOR_BGR2RGB`)
-            cmaps:         If None, the plot function makes guesses about what
-                           color maps to use (if at all). If a single value,
-                           that color map is used for all plots
-                           (e.g. cmaps='gray').
-                           If cmaps is a tuple, the first value is used on the
-                           original image, the second value for the modified
-                           image. If cmaps is a tuple, None-entries are ignored
-                           and result in the normal guessing.
-            print_info:    If True, prints some info about the resource:
-                           dimensions, color channels, data type. Skips the
-                           output of one frame.
+            cmaps: If None, the plot function makes guesses about what color
+                   maps to use (if at all). If a single value, that color map
+                   is used for all plots (e.g. cmaps='gray').  If cmaps is a
+                   tuple, the first value is used on the original image, the
+                   second value for the modified image. If cmaps is a tuple,
+                   None-entries are ignored and result in the normal guessing.
+            print_info: If True, prints some info about the resource:
+                        dimensions, color channels, data type. Skips the output
+                        of one frame.
+            annotations: A list or tuple of annotations. Each annotation is a
+                         list or tuple in turn of this format:
+                             [x, y, frame, options]
+                         x: the x coordinate of the center
+                         y: the y coordinate of the center
+                         frame: the frame number
+                         options: A dictionary. This is optional (leaving the
+                             list with only three elements). Allows the
+                             following keys:
+                             shape: 'RECT' or 'CIRC' (rectangle, circle)
+                             line: linewidth
+                             color: RGB tuple, gray scalar or html hex-string
+                             size: radius for CIRC, (width, height) for RECT
+            annotations_default: A default format, that will be used if no
+                    specific format is given for an annotation. If no format is
+                    specified the following defaults are used:
+                        shape: 'RECT',
+                        color: '#228B22', (forestgreen)
+                        line: 2,
+                        size: (20, 20)
         """
         if source is not None:
             if isinstance(source, type(cv2.VideoCapture())) \
                     or hasattr(source, 'read'):
                 self.capture = source
             else:
+                with open('test.txt', 'w') as f:
+                    print(source, file=f)
                 self.capture = cv2.VideoCapture(source)
         else:
             self.capture = cv2.VideoCapture(0)
@@ -89,6 +113,11 @@ class cvloop(animation.TimedAnimation):
 
         self.function = function
         self.convert_color = convert_color
+
+        self.annotations = (None if not annotations else
+                            sorted(annotations, key=lambda a: a[2]))
+        self.annotations_default = annotations_default
+        self.annotation_artists = []
 
         self.original = None
         self.processed = None
@@ -119,6 +148,8 @@ class cvloop(animation.TimedAnimation):
                                             self.size, self.cmap_original)
         self.processed = self.__prepare_axes(axes_processed, 'Processed',
                                              self.size, self.cmap_processed)
+
+        self.axes_processed = axes_processed
 
         self.update_info()
 
@@ -285,10 +316,56 @@ class cvloop(animation.TimedAnimation):
 
         Args:
             frame: The input frame.
+
         Returns:
             The processed frame.
         """
         return self.function(frame)
+
+    def annotate(self, frame_no):
+        """Annotates the processed axis with given annotations for
+        the provided frame_no.
+
+        Args:
+            frame_no: The current frame number.
+        """
+        for artist in self.annotation_artists:
+            artist.remove()
+        self.annotation_artists = []
+        for annotation in self.annotations:
+            if annotation[2] > frame_no:
+                return
+            if annotation[2] == frame_no:
+                pos = annotation[0:2]
+                shape = self.annotations_default['shape']
+                color = self.annotations_default['color']
+                size = self.annotations_default['size']
+                line = self.annotations_default['line']
+                if len(annotation) > 3:
+                    if 'shape' in annotation[3]:
+                        shape = annotation[3]['shape']
+                    if 'color' in annotation[3]:
+                        color = annotation[3]['color']
+                    if 'size' in annotation[3]:
+                        size = annotation[3]['size']
+                    if 'line' in annotation[3]:
+                        line = annotation[3]['line']
+                if shape == 'CIRC' and hasattr(size, '__len__'):
+                    size = 30
+
+                if not hasattr(color, '__len__'):
+                    color = (color,) * 3
+
+                if shape == 'RECT':
+                    patch = patches.Rectangle((pos[0] - size[0] // 2,
+                                               pos[1] - size[1] // 2),
+                                              size[0], size[1], fill=False,
+                                              lw=line, fc='none', ec=color)
+                elif shape == 'CIRC':
+                    patch = patches.CirclePolygon(pos, radius=size, fc='none',
+                                                  ec=color, lw=line)
+                self.annotation_artists.append(patch)
+                self.axes_processed.add_artist(self.annotation_artists[-1])
 
     def _draw_frame(self, frame_no):
         """Reads, processes and draws the frames.
@@ -323,6 +400,10 @@ class cvloop(animation.TimedAnimation):
             processed = self.to_gray(processed)
         elif not self.is_color_image(processed):
             self.processed.set_cmap('gray')
+
+        if self.annotations:
+            self.annotate(frame_no)
+
         self.processed.set_data(processed)
 
         self.update_info(self.info_string(frame=frame_no))

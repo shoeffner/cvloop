@@ -37,15 +37,11 @@ Requirements
 
 (Recommended versions, additionally tested versions in parentheses.)
 
--  Python 3.6 (Required)
+-  Python 3.6
 -  OpenCV 3.2
 -  Jupyter 4.3.1
-
-Dependencies
-------------
-
--  matplotlib (2.0.0)
--  numpy (1.12.0)
+-  matplotlib 2.0.0
+-  numpy 1.12.0
 
 .. _`OpenCV Documentation`: http://docs.opencv.org/3.1.0/db/d5c/tutorial_py_bg_subtraction.html
 .. _`Video`: https://github.com/opencv/opencv_extra/tree/master/testdata/cv/video
