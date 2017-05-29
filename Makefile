@@ -1,31 +1,31 @@
 # Installs the editable version
 install: uninstall package
-	pip install -e $(CURDIR)
+	pip3 install -e $(CURDIR)
 
 # Installs the packaged version
 testpackage: uninstall package
-	pip install dist/cvloop*.tar.gz
+	pip3 install dist/cvloop*.tar.gz
 
 # Packs the package into the dist directory and signs it
 package: clean doc
-	python setup.py sdist
+	python3 setup.py sdist
 	gpg --detach-sign --armor dist/cvloop*.tar.gz
 
 # Uninstalls the package from a local installation
 uninstall:
-	pip freeze | grep cvloop > /dev/null ; \
+	pip3 freeze | grep cvloop > /dev/null ; \
 	if [ $$? -eq 0 ]; then \
-		pip uninstall cvloop -y ; \
+		pip3 uninstall cvloop -y ; \
 	fi
 
 # Cleans up: Removes the packed package and sanitizes the examples file.
 clean:
 	rm -rf dist
-	python tools/sanitize_ipynb.py examples/cvloop_examples.ipynb
+	python3 tools/sanitize_ipynb.py examples/cvloop_examples.ipynb
 
 # Creates the documentation and updates the functions ipynb.
 doc:
-	python tools/create_functions_ipynb.py  examples/cvloop_functions.ipynb
+	python3 tools/create_functions_ipynb.py  examples/cvloop_functions.ipynb
 
 # Publishes to pypitest
 testpublish: package
