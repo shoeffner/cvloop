@@ -32,7 +32,7 @@ class cvloop(animation.TimedAnimation):
                  side_by_side=False, convert_color=cv2.COLOR_BGR2RGB,
                  cmaps=None, print_info=False, annotations=None,
                  annotations_default={'shape': 'RECT',
-                                      'color': (0.5, 0.9, 0.0),
+                                      'color': '#228B22',
                                       'line': 2,
                                       'size': (20, 20)}):
         """Runs a video loop for the specified source and modifies the stream
@@ -93,7 +93,7 @@ class cvloop(animation.TimedAnimation):
                     specific format is given for an annotation. If no format is
                     specified the following defaults are used:
                         shape: 'RECT',
-                        color: '#008000', (dark green)
+                        color: '#228B22', (forestgreen)
                         line: 2,
                         size: (20, 20)
         """
