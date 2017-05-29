@@ -30,7 +30,11 @@ class cvloop(animation.TimedAnimation):
 
     def __init__(self, source=None, function=lambda x: x, *,
                  side_by_side=False, convert_color=cv2.COLOR_BGR2RGB,
-                 cmaps=None, print_info=False, annotations=None):
+                 cmaps=None, print_info=False, annotations=None,
+                 annotations_default={'shape': 'RECT',
+                                      'color': (0.5, 0.9, 0.0),
+                                      'line': 2,
+                                      'size': (20, 20)}):
         """Runs a video loop for the specified source and modifies the stream
         with the function.
 
@@ -81,13 +85,17 @@ class cvloop(animation.TimedAnimation):
                          options: A dictionary. This is optional (leaving the
                              list with only three elements). Allows the
                              following keys:
-                             shape: 'RECT' or 'CIRC' (rectangle, circle;
-                                    default: RECT)
-                             line: linewidth (default: 2)
-                             color: RGB tuple or gray scalar
-                                    (default: (1, 0, 0), i.e. bright red)
+                             shape: 'RECT' or 'CIRC' (rectangle, circle)
+                             line: linewidth
+                             color: RGB tuple, gray scalar or html hex-string
                              size: radius for CIRC, (width, height) for RECT
-                                    (default: 30; (40, 30) )
+            annotations_default: A default format, that will be used if no specific
+                                format is given for an annotation. If no format is specified
+                                the following defaults are used:
+                                shape: 'RECT',
+                                color: '#008000', (dark green)
+                                line: 2,
+                                size: (20, 20)
         """
         if source is not None:
             if isinstance(source, type(cv2.VideoCapture())) \
@@ -108,6 +116,7 @@ class cvloop(animation.TimedAnimation):
 
         self.annotations = (None if not annotations else
                             sorted(annotations, key=lambda a: a[2]))
+        self.annotations_default = annotations_default
         self.annotation_artists = []
 
         self.original = None
@@ -328,10 +337,10 @@ class cvloop(animation.TimedAnimation):
                 return
             if annotation[2] == frame_no:
                 pos = annotation[0:2]
-                shape = 'RECT'
-                color = (1, 0, 0)
-                size = (40, 30)
-                line = 2
+                shape = self.annotations_default['shape']
+                color = self.annotations_default['color']
+                size = self.annotations_default['size']
+                line = self.annotations_default['line']
                 if len(annotation) > 3:
                     if 'shape' in annotation[3]:
                         shape = annotation[3]['shape']
@@ -355,9 +364,8 @@ class cvloop(animation.TimedAnimation):
                 elif shape == 'CIRC':
                     patch = patches.CirclePolygon(pos, radius=size, fc='none',
                                                   ec=color, lw=line)
-                self.annotation_artists.append(
-                    patch
-                )
+                self.annotation_artists.append(patch
+)
                 self.axes_processed.add_artist(self.annotation_artists[-1])
 
     def _draw_frame(self, frame_no):

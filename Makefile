@@ -8,7 +8,7 @@ testpackage: uninstall package
 
 # Packs the package into the dist directory and signs it
 package: clean doc
-	python setup.py sdist
+	python3 setup.py sdist
 	gpg --detach-sign --armor dist/cvloop*.tar.gz
 
 # Uninstalls the package from a local installation
@@ -21,11 +21,11 @@ uninstall:
 # Cleans up: Removes the packed package and sanitizes the examples file.
 clean:
 	rm -rf dist
-	python tools/sanitize_ipynb.py examples/cvloop_examples.ipynb
+	python3 tools/sanitize_ipynb.py examples/cvloop_examples.ipynb
 
 # Creates the documentation and updates the functions ipynb.
 doc:
-	python tools/create_functions_ipynb.py  examples/cvloop_functions.ipynb
+	python3 tools/create_functions_ipynb.py  examples/cvloop_functions.ipynb
 
 # Publishes to pypitest
 testpublish: package
