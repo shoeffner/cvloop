@@ -1,6 +1,6 @@
 # Installs the editable version
 install: uninstall package
-	pip3 install -U -e $(CURDIR)
+	pip3 install -e $(CURDIR)
 
 # Installs the packaged version
 testpackage: uninstall package
@@ -15,7 +15,7 @@ package: clean doc
 uninstall:
 	pip3 freeze | grep cvloop > /dev/null ; \
 	if [ $$? -eq 0 ]; then \
-		pip uninstall cvloop -y ; \
+		pip3 uninstall cvloop -y ; \
 	fi
 
 # Cleans up: Removes the packed package and sanitizes the examples file.
