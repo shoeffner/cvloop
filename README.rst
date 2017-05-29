@@ -32,6 +32,22 @@ Provides cvloop, a way to show opencv video loops. Designed for jupyter notebook
 
 **More examples**: For more examples check out the `examples notebook`_.
 
+Install
+-------
+
+You can simply install cvloop using pip (make sure to install matplotlib, numpy, OpenCV and Jupyter):
+
+.. code-block::
+
+    pip install cvloop
+
+Or, if you are using conda and don't want to worry about requirements, just use conda-forge:
+
+.. code-block::
+
+    conda config --add channels conda-forge
+    conda install cvloop
+
 Requirements
 ------------
 
@@ -40,12 +56,8 @@ Requirements
 -  Python 3.6 (Required)
 -  OpenCV 3.2
 -  Jupyter 4.3.1
-
-Dependencies
-------------
-
--  matplotlib (2.0.0)
--  numpy (1.12.0)
+-  matplotlib 2.0.0
+-  numpy 1.12.0
 
 .. _`OpenCV Documentation`: http://docs.opencv.org/3.1.0/db/d5c/tutorial_py_bg_subtraction.html
 .. _`Video`: https://github.com/opencv/opencv_extra/tree/master/testdata/cv/video

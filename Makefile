@@ -10,6 +10,8 @@ testpackage: uninstall package
 package: clean doc
 	python setup.py sdist
 	gpg --detach-sign --armor dist/cvloop*.tar.gz
+	shasum -a 256 dist/cvloop-*.tar.gz
+
 
 # Uninstalls the package from a local installation
 uninstall:
