@@ -89,13 +89,13 @@ class cvloop(animation.TimedAnimation):
                              line: linewidth
                              color: RGB tuple, gray scalar or html hex-string
                              size: radius for CIRC, (width, height) for RECT
-            annotations_default: A default format, that will be used if no specific
-                                format is given for an annotation. If no format is specified
-                                the following defaults are used:
-                                shape: 'RECT',
-                                color: '#008000', (dark green)
-                                line: 2,
-                                size: (20, 20)
+            annotations_default: A default format, that will be used if no
+                    specific format is given for an annotation. If no format is
+                    specified the following defaults are used:
+                        shape: 'RECT',
+                        color: '#008000', (dark green)
+                        line: 2,
+                        size: (20, 20)
         """
         if source is not None:
             if isinstance(source, type(cv2.VideoCapture())) \
@@ -364,8 +364,7 @@ class cvloop(animation.TimedAnimation):
                 elif shape == 'CIRC':
                     patch = patches.CirclePolygon(pos, radius=size, fc='none',
                                                   ec=color, lw=line)
-                self.annotation_artists.append(patch
-)
+                self.annotation_artists.append(patch)
                 self.axes_processed.add_artist(self.annotation_artists[-1])
 
     def _draw_frame(self, frame_no):
