@@ -1,10 +1,10 @@
 # Installs the editable version
 install: uninstall package
-	pip install -e $(CURDIR)
+	pip3 install -U -e $(CURDIR)
 
 # Installs the packaged version
 testpackage: uninstall package
-	pip install dist/cvloop*.tar.gz
+	pip3 install dist/cvloop*.tar.gz
 
 # Packs the package into the dist directory and signs it
 package: clean doc
@@ -13,7 +13,7 @@ package: clean doc
 
 # Uninstalls the package from a local installation
 uninstall:
-	pip freeze | grep cvloop > /dev/null ; \
+	pip3 freeze | grep cvloop > /dev/null ; \
 	if [ $$? -eq 0 ]; then \
 		pip uninstall cvloop -y ; \
 	fi
