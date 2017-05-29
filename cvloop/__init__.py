@@ -3,7 +3,7 @@ jupyter notebooks."""
 import sys
 import os
 
-__version__ = '0.3.3'
+__version__ = '0.3.4'
 
 OPENCV_FOUND = False
 OPENCV_VERSION_COMPATIBLE = False

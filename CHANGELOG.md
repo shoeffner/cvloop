@@ -1,6 +1,12 @@
 # Changelog
 
 
+## Version 0.3.4
+
+- Adding annotation feature. Thanks @AndreaSuckro .
+- Adding conda-forge support.
+
+
 ## Version 0.3.3
 
 - Updating README.rst to reflect that Python 3.5 is no longer supported.
