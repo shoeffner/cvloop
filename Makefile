@@ -43,15 +43,15 @@ testpublish: package
 publish: package updateforge
 	@read -p "Enter the name of this package to verify upload to pypi: " name ; \
 	if [ "$$name" == "cvloop" ]; then \
-		twine register -r pypi $$(ls dist/*.tar.gz) ;
-		twine upload -r pypi dist/* ;
+		twine register -r pypi $$(ls dist/*.tar.gz) ; \
+		twine upload -r pypi dist/* ; \
 		cd ./tools/cvloop-feedstock \
 			&& git commit -am "Updating cvloop to version $(cvloopversion)" \
-			&& git push ;
+			&& git push ; \
 		hub pull-request \
 			-b conda-forge:cvloop-feedstock \
 			-h shoeffner:cvloop-feedstock \
-			-m "Updating cvloop to version $(cvloopversion)" ;
+			-m "Updating cvloop to version $(cvloopversion)" ; \
 	else \
 		echo 'Sorry, this was wrong. Please try again.' ; \
 	fi
@@ -59,4 +59,5 @@ publish: package updateforge
 updateforge:
 	python3 tools/updaterecipe.py \
 			$(cvloopversion) \
-			$(shell shasum -a 256 dist/cvloop-*.tar.gz) ;
+			$(shell shasum -a 256 dist/cvloop-*.tar.gz | cut -f 1 -d ' ') \
+	;
