@@ -24,6 +24,7 @@ uninstall:
 clean:
 	rm -rf dist
 	python3 tools/sanitize_ipynb.py examples/cvloop_examples.ipynb
+	for f in manual_tests/*.ipynb ; do python3 tools/sanitize_ipynb.py "$$f" ; done
 
 # Creates the documentation and updates the functions ipynb.
 doc:
