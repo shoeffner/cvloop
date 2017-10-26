@@ -3,7 +3,7 @@ jupyter notebooks."""
 import sys
 import os
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 OPENCV_FOUND = False
 OPENCV_VERSION_COMPATIBLE = False
@@ -17,8 +17,8 @@ except ModuleNotFoundError:
     Is OpenCV installed and properly added to your path?
     you are using a virtual environment, make sure to add the path
     to the OpenCV bindings to the environment\'s site-packages.
-    For example (MacOSX with brew):
-    echo /usr/local/opt/opencv3/lib/python3.6/site-packages \
+    For example (MacOS with brew):
+    echo /usr/local/opt/opencv/lib/python3.6/site-packages \
          > ${HOME}/.virtualenvs/cvloop/lib/python3.6/site-packages/opencv3.pth
     Make sure that the first path contains your cv2.so! (You might have to link
     it properly.)
@@ -41,6 +41,7 @@ if OPENCV_FOUND and OPENCV_VERSION_COMPATIBLE:
         for path in [
             # Max OS with Brew
             (os.sep, 'usr', 'local', 'opt', 'opencv3', 'share', 'OpenCV'),
+            (os.sep, 'usr', 'local', 'opt', 'opencv', 'share', 'OpenCV'),
             # Ubuntu / Arch
             (os.sep, 'usr', 'share', 'opencv'),
                 ]:

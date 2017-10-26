@@ -10,8 +10,6 @@ import numpy as np
 import cv2
 
 import matplotlib
-if matplotlib.get_backend() == 'module://ipykernel.pylab.backend_inline':
-    matplotlib.use('nbAgg')
 
 # Monkeypatch backend to include "pause" button and fire the pause_event.
 from matplotlib.backends.backend_nbagg import NavigationIPy  # noqa: E402
@@ -97,6 +95,9 @@ class cvloop(animation.TimedAnimation):
                         line: 2,
                         size: (20, 20)
         """
+        if plt.get_backend() == 'module://ipykernel.pylab.backend_inline':
+            plt.switch_backend('nbAgg')
+
         if source is not None:
             if isinstance(source, type(cv2.VideoCapture())) \
                     or hasattr(source, 'read'):
