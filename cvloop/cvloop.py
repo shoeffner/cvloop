@@ -6,6 +6,9 @@ default notebook backend (inline) is detected.
 
 import itertools
 
+from IPython.core.getipython import get_ipython
+from IPython.core.magics.pylab import PylabMagics
+
 import numpy as np
 import cv2
 
@@ -95,8 +98,15 @@ class cvloop(animation.TimedAnimation):
                         line: 2,
                         size: (20, 20)
         """
-        if plt.get_backend() == 'module://ipykernel.pylab.backend_inline':
-            plt.switch_backend('nbAgg')
+        if plt.get_backend() in (
+                'module://ipykernel.pylab.backend_inline',
+                'nbAgg'
+                ):
+            # Calls IPython's magic variables
+            for conf in get_ipython().configurables:
+                if isinstance(conf, PylabMagics):
+                    conf.matplotlib(line='notebook')
+                    conf.matplotlib(line='notebook')
 
         if source is not None:
             if isinstance(source, type(cv2.VideoCapture())) \
@@ -260,7 +270,8 @@ class cvloop(animation.TimedAnimation):
         axes.set_title(title)
 
         # prepare image data
-        axes_image = image.AxesImage(axes, cmap=cmap)
+        axes_image = image.AxesImage(axes, cmap=cmap,
+                extent=(0, size[1], size[0], 0))
         axes_image.set_data(np.random.random((size[0], size[1], 3)))
 
         axes.add_image(axes_image)
