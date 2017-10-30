@@ -49,11 +49,11 @@ publish: package updateforge
 		cd ./tools/cvloop-feedstock \
 			&& git commit -am "Updating cvloop to version $(cvloopversion)" \
 			&& git push ; \
-		cd ./tools/cvloop-feedstock \
 			&& hub pull-request \
 				-b conda-forge/cvloop-feedstock:master \
 				-h shoeffner/cvloop-feedstock:master \
 				-m "Updating cvloop to version $(cvloopversion)" ; \
+		cd ../.. ; \
 		git commit ./tools/cvloop-feedstock -m "Updating submodule for $(cvloopversion)" ; \
 	else \
 		echo 'Sorry, this was wrong. Please try again.' ; \
