@@ -27,7 +27,7 @@ def main():
             pass
 
     with open(sys.argv[1], 'w') as nbfile:
-        json.dump(notebook, nbfile, indent=4)
+        json.dump(notebook, nbfile, indent=1)
 
 
 if __name__ == '__main__':
