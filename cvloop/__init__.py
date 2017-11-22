@@ -16,10 +16,10 @@ except ModuleNotFoundError:
     print('''
     Is OpenCV installed and properly added to your path?
     you are using a virtual environment, make sure to add the path
-    to the OpenCV bindings to the environment\'s site-packages.
+    to the OpenCV bindings to the environment's site-packages.
     For example (MacOS with brew):
     echo /usr/local/opt/opencv/lib/python3.6/site-packages \
-         > ${HOME}/.virtualenvs/cvloop/lib/python3.6/site-packages/opencv3.pth
+         > .venv/lib/python3.6/site-packages/opencv3.pth
     Make sure that the first path contains your cv2.so! (You might have to link
     it properly.)
     See https://docs.python.org/3/library/site.html
@@ -39,15 +39,14 @@ if OPENCV_FOUND and OPENCV_VERSION_COMPATIBLE:
     except NameError:
         OPENCV_CASCADE_PATH = os.curdir
         for path in [
-            # Max OS with Brew
-            (os.sep, 'usr', 'local', 'opt', 'opencv3', 'share', 'OpenCV'),
-            (os.sep, 'usr', 'local', 'opt', 'opencv', 'share', 'OpenCV'),
-            # Ubuntu / Arch
-            (os.sep, 'usr', 'share', 'opencv'),
-                ]:
+                # Max OS with Brew
+                (os.sep, 'usr', 'local', 'opt', 'opencv3', 'share', 'OpenCV'),
+                (os.sep, 'usr', 'local', 'opt', 'opencv', 'share', 'OpenCV'),
+                # Ubuntu / Arch
+                (os.sep, 'usr', 'share', 'opencv')]:
             path = os.path.abspath(os.path.join(*path))
             if os.path.isdir(os.path.join(path, 'haarcascades')):
                 OPENCV_CASCADE_PATH = path
 
-    from .cvloop import cvloop
-    from .functions import *
+    from .cvloop import cvloop  # noqa: W0611
+    from .functions import *  # noqa: W0401, W0611 pylint: disable=wildcard-import

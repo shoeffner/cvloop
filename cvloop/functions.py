@@ -1,9 +1,10 @@
 """Provides ready to use example functions for the cvloop."""
 
-from . import OPENCV_CASCADE_PATH
 import os
 import numpy as np
 import cv2
+
+from . import OPENCV_CASCADE_PATH
 
 
 class ForegroundExtractor:
@@ -57,7 +58,7 @@ class BackgroundSubtractorGMG:
             self.strel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
         else:
             self.strel = structuring_element
-        self.fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()
+        self.fgbg = cv2.bgsegm.createBackgroundSubtractorGMG()  # noqa: E501 pylint: disable=no-member,line-too-long
 
     def __call__(self, image):
         """Returns a foreground mask of the image."""
@@ -83,7 +84,7 @@ class BackgroundSubtractorMOG:
         *Note:* Requires OpenCV to be built with `--contrib` as it uses the
         `bgsegm` package.
         """
-        self.fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
+        self.fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()  # noqa: E501 pylint: disable=no-member,line-too-long
 
     def __call__(self, image):
         """Returns a foreground mask of the image."""
@@ -124,7 +125,7 @@ class Inverter:
             high: the value from which the image has to be subtracted.
                   Defaults to 255.
         """
-        self.high = 255
+        self.high = high
 
     def __call__(self, image):
         """Calculates the image negative, i.e. self.high - image."""
@@ -144,21 +145,23 @@ class DrawHat:
 
     def __init__(self, hat_path=os.path.join(os.curdir, 'hat.png'),
                  cascade_path=os.path.join(
-                              OPENCV_CASCADE_PATH, 'haarcascades',
-                              'haarcascade_frontalface_default.xml'),
+                     OPENCV_CASCADE_PATH, 'haarcascades',
+                     'haarcascade_frontalface_default.xml'),
                  w_offset=1.3, x_offset=-20, y_offset=80, draw_box=False):
+        # pragma pylint: disable=line-too-long
         """Initializes a `DrawHat` instance.
 
         Args:
             hat_path: The path to the hat file. Defaults to ./hat.png .
             cascade_path: The path to the face cascade file.
-                          Defaults to cvloop.OPENCV_CASCADE_PATH/haarcascades/
-                                        haarcascade_frontalface_default.xml
+                          Defaults to
+                          `cvloop.OPENCV_CASCADE_PATH/haarcascades/haarcascade_frontalface_default.xml`
             w_offset: Hat width additional scaling.
             x_offset: Number of pixels right to move hat.
             y_offset: Number of pixels down to move hat.
             draw_box: If True, draws boxes around detected faces.
         """
+        # pragma pylint: enable=line-too-long
         self.w_offset = w_offset
         self.x_offset = x_offset
         self.y_offset = y_offset
@@ -167,7 +170,15 @@ class DrawHat:
         self.cascade = cv2.CascadeClassifier(cascade_path)
         self.hat = self.load_hat(hat_path)
 
-    def load_hat(self, path):
+    def load_hat(self, path):  # pylint: disable=no-self-use
+        """Loads the hat from a picture at path.
+
+        Args:
+            path: The path to load from
+
+        Returns:
+            The hat data.
+        """
         hat = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         if hat is None:
             raise ValueError('No hat image found at `{}`'.format(path))
@@ -175,13 +186,23 @@ class DrawHat:
         return cv2.merge((r, g, b, a))
 
     def find_faces(self, image, draw_box=False):
+        """Uses a haarcascade to detect faces inside an image.
+
+        Args:
+            image: The image.
+            draw_box: If True, the image will be marked with a rectangle.
+
+        Return:
+            The faces as returned by OpenCV's detectMultiScale method for
+            cascades.
+        """
         frame_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         faces = self.cascade.detectMultiScale(
-                frame_gray,
-                scaleFactor=1.3,
-                minNeighbors=5,
-                minSize=(50, 50),
-                flags=0)
+            frame_gray,
+            scaleFactor=1.3,
+            minNeighbors=5,
+            minSize=(50, 50),
+            flags=0)
 
         if draw_box:
             for x, y, w, h in faces:
@@ -189,13 +210,21 @@ class DrawHat:
                               (x + w, y + h), (0, 255, 0), 2)
         return faces
 
-    def __call__(self, image):
+    def __call__(self, image):  # pylint: disable=too-many-locals
+        """Draws a hat on top of detected faces inside the image.
+
+        Args:
+            image: The image.
+
+        Returns:
+            The image with a hat.
+        """
         frame_height = image.shape[0]
         frame_width = image.shape[1]
 
         faces = self.find_faces(image, self.draw_box)
 
-        for x, y, w, h in faces:
+        for x, y, w, h in faces:  # pylint: disable=unused-variable
             hat = self.hat.copy()
 
             # Scale hat to fit face.

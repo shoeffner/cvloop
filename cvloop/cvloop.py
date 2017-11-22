@@ -12,21 +12,91 @@ from IPython.core.magics.pylab import PylabMagics
 import numpy as np
 import cv2
 
-import matplotlib
-
 # Monkeypatch backend to include "pause" button and fire the pause_event.
 from matplotlib.backends.backend_nbagg import NavigationIPy  # noqa: E402
 NavigationIPy.toolitems += [('Pause', 'Pause/Resume video',
                              'fa fa-pause icon-pause', 'pause')]
 NavigationIPy.pause = lambda self: self.canvas.callbacks.process('pause_event')
 
+# pragma pylint: disable=wrong-import-position
 import matplotlib.pyplot as plt  # noqa: E402
 import matplotlib.animation as animation  # noqa: E402
 import matplotlib.image as image  # noqa: E402
 import matplotlib.patches as patches  # noqa: E402
+# pragma pylint: enable=wrong-import-position
 
 
-class cvloop(animation.TimedAnimation):
+def prepare_axes(axes, title, size, cmap=None):
+    """Prepares an axes object for clean plotting.
+
+    Removes x and y axes labels and ticks, sets the aspect ratio to be
+    equal, uses the size to determine the drawing area and fills the image
+    with random colors as visual feedback.
+
+    Creates an AxesImage to be shown inside the axes object and sets the
+    needed properties.
+
+    Args:
+        axes:  The axes object to modify.
+        title: The title.
+        size:  The size of the expected image.
+        cmap:  The colormap if a custom color map is needed.
+                (Default: None)
+    Returns:
+        The AxesImage's handle.
+    """
+    if axes is None:
+        return None
+
+    # prepare axis itself
+    axes.set_xlim([0, size[1]])
+    axes.set_ylim([size[0], 0])
+    axes.set_aspect('equal')
+
+    axes.axis('off')
+    if isinstance(cmap, str):
+        title = '{} (cmap: {})'.format(title, cmap)
+    axes.set_title(title)
+
+    # prepare image data
+    axes_image = image.AxesImage(axes, cmap=cmap,
+                                 extent=(0, size[1], size[0], 0))
+    axes_image.set_data(np.random.random((size[0], size[1], 3)))
+
+    axes.add_image(axes_image)
+    return axes_image
+
+
+def is_color_image(frame):
+    """Checks if an image is a color image.
+
+    A color image is an image with at least three dimensions and in the
+    third dimension at least three color channels.
+
+    Returns:
+        True if the image is a color image.
+    """
+    return len(frame.shape) >= 3 and frame.shape[2] >= 3
+
+
+def to_gray(frame):
+    """If the input is a color image, it is converted to gray scale.
+
+    The first color channel is considered as R, the second as G, and
+    the last as B. The gray scale image is then the weighted sum:
+
+        gray = .299 R + .587 G + .114 B
+
+    Returns:
+        Either the converted image (if it was a color image) or the
+        original.
+    """
+    if not is_color_image(frame):
+        return frame
+    return np.dot(frame[..., :3], [.299, .587, .114])
+
+
+class cvloop(animation.TimedAnimation):  # noqa: E501 pylint: disable=invalid-name, too-many-instance-attributes
     """Uses a TimedAnimation to efficiently render video sources with blit."""
 
     def __init__(self, source=None, function=lambda x: x, *,
@@ -100,8 +170,7 @@ class cvloop(animation.TimedAnimation):
         """
         if plt.get_backend() in (
                 'module://ipykernel.pylab.backend_inline',
-                'nbAgg'
-                ):
+                'nbAgg'):
             # Calls IPython's magic variables
             for conf in get_ipython().configurables:
                 if isinstance(conf, PylabMagics):
@@ -113,8 +182,6 @@ class cvloop(animation.TimedAnimation):
                     or hasattr(source, 'read'):
                 self.capture = source
             else:
-                with open('test.txt', 'w') as f:
-                    print(source, file=f)
                 self.capture = cv2.VideoCapture(source)
         else:
             self.capture = cv2.VideoCapture(0)
@@ -155,10 +222,10 @@ class cvloop(animation.TimedAnimation):
             self.print_info(self.capture)
 
         self.size = self.determine_size(self.capture)
-        self.original = self.__prepare_axes(axes_original, 'Original',
-                                            self.size, self.cmap_original)
-        self.processed = self.__prepare_axes(axes_processed, 'Processed',
-                                             self.size, self.cmap_processed)
+        self.original = prepare_axes(axes_original, 'Original',
+                                     self.size, self.cmap_original)
+        self.processed = prepare_axes(axes_processed, 'Processed',
+                                      self.size, self.cmap_processed)
 
         self.axes_processed = axes_processed
 
@@ -172,16 +239,16 @@ class cvloop(animation.TimedAnimation):
         self.figure.canvas.mpl_connect('close_event', self.evt_release)
         self.figure.canvas.mpl_connect('pause_event', self.evt_toggle_pause)
 
-    def evt_release(self, *args):
+    def evt_release(self, *args):  # pylint: disable=unused-argument
         """Tries to release the capture."""
         try:
             self.capture.release()
         except AttributeError:
             pass
 
-    def evt_toggle_pause(self, *args):
+    def evt_toggle_pause(self, *args):  # pylint: disable=unused-argument
         """Pauses and resumes the video source."""
-        if self.event_source._timer is None:
+        if self.event_source._timer is None:  # noqa: e501 pylint: disable=protected-access
             self.event_source.start()
         else:
             self.event_source.stop()
@@ -237,46 +304,6 @@ class cvloop(animation.TimedAnimation):
                 height = frame.shape[0]
         return (int(height), int(width))
 
-    def __prepare_axes(self, axes, title, size, cmap=None):
-        """Prepares an axes object for clean plotting.
-
-        Removes x and y axes labels and ticks, sets the aspect ratio to be
-        equal, uses the size to determine the drawing area and fills the image
-        with random colors as visual feedback.
-
-        Creates an AxesImage to be shown inside the axes object and sets the
-        needed properties.
-
-        Args:
-            axes:  The axes object to modify.
-            title: The title.
-            size:  The size of the expected image.
-            cmap:  The colormap if a custom color map is needed.
-                   (Default: None)
-        Returns:
-            The AxesImage's handle.
-        """
-        if axes is None:
-            return None
-
-        # prepare axis itself
-        axes.set_xlim([0, size[1]])
-        axes.set_ylim([size[0], 0])
-        axes.set_aspect('equal')
-
-        axes.axis('off')
-        if isinstance(cmap, str):
-            title = '{} (cmap: {})'.format(title, cmap)
-        axes.set_title(title)
-
-        # prepare image data
-        axes_image = image.AxesImage(axes, cmap=cmap,
-                extent=(0, size[1], size[0], 0))
-        axes_image.set_data(np.random.random((size[0], size[1], 3)))
-
-        axes.add_image(axes_image)
-        return axes_image
-
     def new_frame_seq(self):
         """Returns an endless frame counter.
 
@@ -319,7 +346,7 @@ class cvloop(animation.TimedAnimation):
                 # has no release method, thus just pass
                 pass
             return None
-        if self.convert_color != -1 and self.is_color_image(frame):
+        if self.convert_color != -1 and is_color_image(frame):
             return cv2.cvtColor(frame, self.convert_color)
         return frame
 
@@ -334,34 +361,30 @@ class cvloop(animation.TimedAnimation):
         """
         return self.function(frame)
 
-    def annotate(self, frame_no):
+    def annotate(self, framedata):
         """Annotates the processed axis with given annotations for
-        the provided frame_no.
+        the provided framedata.
 
         Args:
-            frame_no: The current frame number.
+            framedata: The current frame number.
         """
         for artist in self.annotation_artists:
             artist.remove()
         self.annotation_artists = []
         for annotation in self.annotations:
-            if annotation[2] > frame_no:
+            if annotation[2] > framedata:
                 return
-            if annotation[2] == frame_no:
+            if annotation[2] == framedata:
                 pos = annotation[0:2]
                 shape = self.annotations_default['shape']
                 color = self.annotations_default['color']
                 size = self.annotations_default['size']
                 line = self.annotations_default['line']
                 if len(annotation) > 3:
-                    if 'shape' in annotation[3]:
-                        shape = annotation[3]['shape']
-                    if 'color' in annotation[3]:
-                        color = annotation[3]['color']
-                    if 'size' in annotation[3]:
-                        size = annotation[3]['size']
-                    if 'line' in annotation[3]:
-                        line = annotation[3]['line']
+                    shape = annotation[3].get('shape', shape)
+                    color = annotation[3].get('color', color)
+                    size = annotation[3].get('size', size)
+                    line = annotation[3].get('line', line)
                 if shape == 'CIRC' and hasattr(size, '__len__'):
                     size = 30
 
@@ -379,7 +402,7 @@ class cvloop(animation.TimedAnimation):
                 self.annotation_artists.append(patch)
                 self.axes_processed.add_artist(self.annotation_artists[-1])
 
-    def _draw_frame(self, frame_no):
+    def _draw_frame(self, framedata):
         """Reads, processes and draws the frames.
 
         If needed for color maps, conversions to gray scale are performed. In
@@ -389,63 +412,36 @@ class cvloop(animation.TimedAnimation):
         This function is called by TimedAnimation.
 
         Args:
-            frame_no: The frame number.
+            framedata: The frame data.
         """
         original = self.read_frame()
         if original is None:
             self.update_info(self.info_string(message='Finished.',
-                                              frame=frame_no))
+                                              frame=framedata))
             return
 
         if self.original is not None:
             processed = self.process_frame(original.copy())
 
             if self.cmap_original is not None:
-                original = self.to_gray(original)
-            elif not self.is_color_image(original):
+                original = to_gray(original)
+            elif not is_color_image(original):
                 self.original.set_cmap('gray')
             self.original.set_data(original)
         else:
             processed = self.process_frame(original)
 
         if self.cmap_processed is not None:
-            processed = self.to_gray(processed)
-        elif not self.is_color_image(processed):
+            processed = to_gray(processed)
+        elif not is_color_image(processed):
             self.processed.set_cmap('gray')
 
         if self.annotations:
-            self.annotate(frame_no)
+            self.annotate(framedata)
 
         self.processed.set_data(processed)
 
-        self.update_info(self.info_string(frame=frame_no))
-
-    def is_color_image(self, frame):
-        """Checks if an image is a color image.
-
-        A color image is an image with at least three dimensions and in the
-        third dimension at least three color channels.
-
-        Returns:
-            True if the image is a color image.
-        """
-        return len(frame.shape) >= 3 and frame.shape[2] >= 3
-
-    def to_gray(self, frame):
-        """If the input is a color image, it is converted to gray scale.
-
-        The first color channel is considered as R, the second as G, and
-        the last as B. The gray scale image is then the weighted sum:
-
-            gray = .299 R + .587 G + .114 B
-
-        Returns:
-            Either the converted image (if it was a color image) or the
-            original.
-        """
-        if not self.is_color_image(frame):
-            return frame
-        return np.dot(frame[..., :3], [.299, .587, .114])
+        self.update_info(self.info_string(frame=framedata))
 
     def update_info(self, custom=None):
         """Updates the figure's suptitle.

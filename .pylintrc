@@ -1,0 +1,3 @@
+[General]
+extension-pkg-whitelist=cv2
+disable=too-few-public-methods,invalid-name,too-many-arguments
