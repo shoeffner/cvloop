@@ -28,7 +28,7 @@ except ModuleNotFoundError:
 
 if OPENCV_FOUND:
     MAJOR, MINOR, PATCH = cv2.__version__.split('.')
-    OPENCV_VERSION_COMPATIBLE = int(MAJOR) >= 3 and int(MINOR) >= 1
+    OPENCV_VERSION_COMPATIBLE = int(MAJOR) > 3 or (int(MAJOR) == 3 and int(MINOR) >= 1)
     if not OPENCV_VERSION_COMPATIBLE:
         print('OpenCV version {} is lower than 3.1!'.format(cv2.__version__),
               file=sys.stderr)
